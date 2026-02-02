@@ -1,0 +1,17 @@
+{
+  "schema": "watchtower/ledger_event_v1",
+  "type": "object",
+  "required": ["schema_version","tenant_id","event_id","device_id","type","occurred_utc","producer","payload_sha256","prev_hash","hash"],
+  "properties": {
+    "schema_version":{"type":"string","enum":["1"]},
+    "tenant_id":{"type":"string"},
+    "event_id":{"type":"string"},
+    "device_id":{"type":"string"},
+    "type":{"type":"string"},
+    "occurred_utc":{"type":"string"},
+    "producer":{"type":"string"},
+    "payload_sha256":{"type":"string"},
+    "prev_hash":{"type":"string"},
+    "hash":{"type":"string"}
+  }
+}

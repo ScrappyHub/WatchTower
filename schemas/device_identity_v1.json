@@ -1,0 +1,42 @@
+{
+  "schema": "watchtower/device_identity_v1",
+  "type": "object",
+  "required": ["schema_version","tenant_id","device_id","identity_class","public_key","collected_at_utc","platform","identity_facts","policy_ref"],
+  "properties": {
+    "schema_version": {"type":"string","enum":["1"]},
+    "tenant_id": {"type":"string"},
+    "device_id": {"type":"string"},
+    "identity_class": {"type":"string","enum":["user-asserted","os-rooted","hardware-rooted","unknown"]},
+    "public_key": {"type":"string"},
+    "key_attestation": {"type":"object"},
+    "collected_at_utc": {"type":"string"},
+    "platform": {
+      "type":"object",
+      "required":["os_family","os_version"],
+      "properties":{
+        "os_family":{"type":"string","enum":["windows","linux","macos","android","ios","embedded","unknown"]},
+        "os_version":{"type":"string"},
+        "kernel_version":{"type":"string"}
+      }
+    },
+    "identity_facts": {
+      "type":"object",
+      "properties":{
+        "hostname":{"type":"string"},
+        "tpm_present":{"type":"string","enum":["true","false","unknown"]},
+        "secure_boot":{"type":"string","enum":["on","off","unknown"]},
+        "tpm_ek_pub_hash":{"type":"string"},
+        "machine_install_id_hash":{"type":"string"},
+        "hardware_fingerprint_hash":{"type":"string"}
+      }
+    },
+    "policy_ref": {
+      "type":"object",
+      "required":["policy_id","policy_hash"],
+      "properties":{
+        "policy_id":{"type":"string"},
+        "policy_hash":{"type":"string"}
+      }
+    }
+  }
+}

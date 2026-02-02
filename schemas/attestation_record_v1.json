@@ -1,0 +1,16 @@
+{
+  "schema": "watchtower/attestation_record_v1",
+  "type": "object",
+  "required": ["schema_version","tenant_id","device_id","created_at_utc","attestation_type","subject_hash","claims","evidence_refs","signature"],
+  "properties": {
+    "schema_version":{"type":"string","enum":["1"]},
+    "tenant_id":{"type":"string"},
+    "device_id":{"type":"string"},
+    "created_at_utc":{"type":"string"},
+    "attestation_type":{"type":"string","enum":["platform","triad","wrapper"]},
+    "subject_hash":{"type":"string"},
+    "claims":{"type":"array","items":{"type":"object"}},
+    "evidence_refs":{"type":"array","items":{"type":"object","required":["sha256","media_type"],"properties":{"sha256":{"type":"string"},"media_type":{"type":"string"},"byte_length":{"type":"integer"}}}},
+    "signature":{"type":"object","required":["alg","key_id","sig"],"properties":{"alg":{"type":"string"},"key_id":{"type":"string"},"sig":{"type":"string"}}}
+  }
+}
