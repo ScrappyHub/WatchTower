@@ -1,89 +1,50 @@
-# Watchtower Operations Runbook
+# Operations
 
-This file documents deterministic operational steps.
+All commands are deterministic.
 
 ---
 
-## First Time Setup
-
-Generate allowed signers
+## Regenerate trust material
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\make_allowed_signers_v1.ps1 -RepoRoot .
 
 
 ---
 
-## Show Identity
+## Show identity
 
 powershell.exe -File scripts\show_identity_v1.ps1 -RepoRoot .
 
 
 ---
 
-## Ingest Packet
-
-Place packet directory into:
-
-packets/inbox/
-
-Run:
+## Ingest packet
 
 powershell.exe -File scripts\watchtower_ingest_packet_v1.ps1 -RepoRoot . -PacketDir packets\inbox<packet>
 
 
-Results:
-
-• verified → receipts written  
-• invalid → moved to quarantine  
-
 ---
 
-## Re-verify Quarantine
-
-powershell.exe -File scripts\watchtower_verify_quarantine_v1.ps1 -RepoRoot .
-
-
----
-
-## Emit Device Pledge
+## Emit device pledge
 
 powershell.exe -File scripts\watchtower_emit_device_pledge_v1.ps1 -RepoRoot .
 
 
-Produces signed pledge in outbox.
-
 ---
 
-## Duplicate Receipts to NFL
+## Duplicate receipts to NFL
 
 powershell.exe -File scripts\watchtower_duplicate_to_nfl_v1.ps1 -RepoRoot .
 
 
 ---
 
-## Repair Trust
-
-After trust_bundle change:
-
-powershell.exe -File scripts\make_allowed_signers_v1.ps1 -RepoRoot .
-
-
----
-
-## NEVER DO
+## Rules
 
 • never edit receipts  
-• never edit allowed_signers manually  
+• never edit allowed_signers  
 • never bypass trust_bundle  
-• never run scripts interactively  
-• never depend on environment variables  
+• never run interactively  
+• never depend on machine state  
 
-All runs must be file-based and deterministic.
-
----
-
-## Debug Rule
-
-If hashes differ across runs:
-
-Treat as bug immediately.
+Only file-based execution is valid.
