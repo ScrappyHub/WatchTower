@@ -1,0 +1,17 @@
+{
+  "schema": "watchtower.policy.v1",
+  "mode": "restrictive",
+  "rules": {
+    "allow_unknown_namespaces": false,
+    "require_detached_signatures": true,
+    "require_trust_bundle_identity": true,
+    "require_receipts": true,
+    "allow_network_calls": false,
+    "allow_runtime_code_execution": false,
+    "allow_payload_execution": false,
+    "allow_mutation_of_receipts": false,
+    "allow_mutation_of_trust_bundle_during_run": false,
+    "require_sha256_hashing": true,
+    "require_append_only_logs": true
+  }
+}
