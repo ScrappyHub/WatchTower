@@ -1,0 +1,8 @@
+{
+  "schema": "watchtower.policy.overlay.v1",
+  "mode": "restrictive",
+  "rules": {
+    "allow_unknown_namespaces": false,
+    "allow_network_calls": false
+  }
+}
