@@ -1,126 +1,97 @@
-# Watchtower Canon
+# Canon
 
-This document defines immutable behavioral law.
-
-These rules must never change without a version bump.
+This document defines immutable behavior.
 
 ---
 
-## Identity Law
+## Identity
 
-Watchtower has exactly one authority identity:
+Exactly one authority:
 
-principal:
 single-tenant/watchtower_authority/authority/watchtower
 
 All signatures originate from this identity.
 
 ---
 
-## Trust Law
+## Trust
 
 trust_bundle.json is the only source of truth.
 
-allowed_signers MUST be derived.
+allowed_signers is derived only.
 
-Nothing else is trusted.
+No implicit trust.
 
 ---
 
-## Receipt Law
+## Receipts
 
-Every action MUST append a receipt to:
+All actions append to:
 
 proofs/receipts/neverlost.ndjson
 
-Receipts are:
+Constraints:
 
-• UTF-8
-• no BOM
-• LF only
 • append-only
-• hashed
+• UTF-8
+• LF only
+• deterministic ordering
+• sha256-hashable
 
 No edits.
-No rewrites.
-No truncation.
 
 ---
 
-## Determinism Law
+## Determinism
 
-Given identical inputs:
+Equal inputs must yield equal outputs.
 
-• packet
-• trust bundle
-• allowed signers
-• policy
-
-Watchtower MUST produce identical outputs and hashes.
+Differences indicate fault.
 
 ---
 
-## Namespace Law
+## Namespaces
 
-Watchtower only accepts namespaces present in trust_bundle.
+Only namespaces present in trust_bundle are valid.
 
-Unknown namespaces are rejected.
-
----
-
-## Overlay Law
-
-Overlay policy may only restrict.
-
-effective_policy = canonical ∩ overlay
-
-Overlay may never permit what canonical denies.
+All others are rejected.
 
 ---
 
-## Transport Law (Packet Constitution)
+## Overlay
+
+overlay_policy ∩ canonical_policy
+
+Overlay may restrict only.
+
+Overlay may not permit.
+
+---
+
+## Scope
+
+Watchtower verifies and attests only.
+
+No execution.
+
+No mutation.
+
+No orchestration.
+
+---
+
+## Packet Model
 
 Packets are directories.
 
 Detached signatures only.
 
-No inline signatures.
-
-No network trust.
-
-Everything must verify locally.
-
----
-
-## Scope Law
-
-Watchtower does NOT:
-
-• update software
-• modify systems
-• execute payloads
-• act as agent
-
-It only verifies and attests.
-
----
-
-## Failure Law
-
-If verification cannot be reproduced deterministically:
-
-The packet is invalid.
+Verification must work offline.
 
 ---
 
 ## Philosophy
 
-Watchtower is a measuring instrument.
-
-Not a smart system.
-
-Not adaptive.
-
-Not heuristic.
-
-Pure verification only.
+Small.
+Boring.
+Auditable.
