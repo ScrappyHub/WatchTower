@@ -113,7 +113,8 @@ Exec git -C $RepoRoot add -- scripts/commit_witness.ps1
 $st = & git -C $RepoRoot status --porcelain
 if (-not ($st | Select-String -SimpleMatch "scripts/commit_witness.ps1")) {
   Write-Host "OK: nothing to commit (scripts/commit_witness.ps1 already matches target content)" -ForegroundColor Green
-  exit 0
+  $code = (0)
+  if ($MyInvocation.InvocationName -eq '.') { return $code } else { exit $code }
 }
 
 Exec git -C $RepoRoot commit -m "watchtower: add parser-safe commit_witness skeleton (no here-strings)"

@@ -13,9 +13,7 @@ function Write-Utf8NoBom([string]$Path, [string]$Content) {
   [System.IO.File]::WriteAllText($Path, $norm, $enc)
 }
 
-function Read-Bytes([string]$Path) {
-  return [System.IO.File]::ReadAllBytes($Path)
-}
+function Read-Bytes([string]$Path) { return [System.IO.File]::ReadAllBytes($Path) }
 
 function Sha256HexBytes([byte[]]$b) {
   $sha = [System.Security.Cryptography.SHA256]::Create()
@@ -27,7 +25,7 @@ function Sha256HexPath([string]$Path) {
   return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
 }
 
-function To-CanonJson([hashtable]$obj, [int]$Depth=40) {
+function To-CanonJson($obj, [int]$Depth=60) {
   # Caller must supply [ordered] hashtables for deterministic key order.
   return ($obj | ConvertTo-Json -Depth $Depth -Compress)
 }
@@ -44,22 +42,59 @@ function RelPathUnix([string]$Base, [string]$Full) {
 
 function Write-Sha256Sums([string]$PacketDir) {
   # Deterministic order by relative path (unix separators)
-  $all = Get-ChildItem -LiteralPath $PacketDir -File -Recurse | Sort-Object FullName
+  # MUST exclude sha256sums.txt itself (canonical rule)
+  $all = Get-ChildItem -LiteralPath $PacketDir -File -Recurse |
+    Where-Object { $_.Name -ne "sha256sums.txt" } |
+    Sort-Object FullName
+
   $lines = New-Object System.Collections.Generic.List[string]
   foreach ($f in $all) {
     $rel = RelPathUnix $PacketDir $f.FullName
     $h = Sha256HexPath $f.FullName
     $lines.Add(("{0}  {1}" -f $h, $rel))
   }
+
   $out = Join-Path $PacketDir "sha256sums.txt"
   Write-Utf8NoBom $out (($lines -join "`n") + "`n")
 }
 
-function PacketSha([string]$PacketDir) {
-  # Packet id = sha256 over sha256sums.txt bytes
-  $p = Join-Path $PacketDir "sha256sums.txt"
-  if (-not (Test-Path -LiteralPath $p)) { throw "Missing sha256sums.txt: $p" }
-  return Sha256HexBytes (Read-Bytes $p)
+function Build-ManifestV1_1([string]$PacketDir, [string]$Producer, [string]$ProducerInstance, [string]$PacketId) {
+  # packet_manifest.v1
+  # Non-circular: manifest lists EVERY file except itself.
+  $created = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+
+  $files = New-Object System.Collections.Generic.List[object]
+
+  $all = Get-ChildItem -LiteralPath $PacketDir -File -Recurse |
+    Where-Object { $_.Name -ne "manifest.json" } |
+    Sort-Object FullName
+
+  foreach ($f in $all) {
+    $rel = RelPathUnix $PacketDir $f.FullName
+    $h = Sha256HexPath $f.FullName
+    $bytes = [int64]$f.Length
+    $files.Add([ordered]@{ path=$rel; bytes=$bytes; sha256=$h })
+  }
+
+  $m = [ordered]@{
+    schema = "packet_manifest.v1"
+    packet_id = $PacketId
+    producer = $Producer
+    producer_instance = $ProducerInstance
+    created_at_utc = $created
+    files = @($files)
+  }
+
+  $json = (To-CanonJson $m 60) + "`n"
+  Write-Utf8NoBom (Join-Path $PacketDir "manifest.json") $json
+}
+
+function PacketIdFromManifest([string]$PacketDir) {
+  # PacketId = sha256( canonical_bytes(manifest.json) )
+  $m = Join-Path $PacketDir "manifest.json"
+  if (-not (Test-Path -LiteralPath $m)) { throw "Missing manifest.json: $m" }
+  $bytes = Read-Bytes $m
+  return Sha256HexBytes $bytes
 }
 
 function SshYSignFile([string]$KeyPath, [string]$Namespace, [string]$SignerIdentity, [string]$FileToSign, [string]$SigOut) {
@@ -67,11 +102,9 @@ function SshYSignFile([string]$KeyPath, [string]$Namespace, [string]$SignerIdent
   if (-not (Test-Path -LiteralPath $KeyPath)) { throw "Missing signing key: $KeyPath" }
   if (-not (Test-Path -LiteralPath $FileToSign)) { throw "Missing file to sign: $FileToSign" }
 
-  # ssh-keygen -Y sign writes "<file>.sig" next to the file by default on many builds.
   $defaultSig = "$FileToSign.sig"
   if (Test-Path -LiteralPath $defaultSig) { Remove-Item -LiteralPath $defaultSig -Force }
 
-  # Most compatible flags: -Y sign -f key -n namespace -I identity file
   & ssh-keygen -Y sign -f $KeyPath -n $Namespace -I $SignerIdentity $FileToSign | Out-Null
 
   if (-not (Test-Path -LiteralPath $defaultSig)) {

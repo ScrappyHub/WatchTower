@@ -1,2 +1,23 @@
-# Watchtower repo ignores (keep patch scripts versioned)
-scripts/*.bak_*
+# ---- WATCHTOWER local-only ----
+
+# Private keys must never be committed
+proofs/keys/*
+!proofs/keys/.gitkeep
+!proofs/keys/*.pub
+
+# Receipts are local append-only logs (do not commit contents)
+proofs/receipts/*
+!proofs/receipts/.gitkeep
+
+# Derived / backup files
+proofs/trust/*.bak_*
+**/*.bak_*
+
+# Local smoke-test payloads
+proofs/test_payload.txt
+proofs/test_payload.txt.sig
+
+# Scratch scripts (kept locally, not committed)
+scripts/_scratch/*
+!scripts/_scratch/.gitkeep
+

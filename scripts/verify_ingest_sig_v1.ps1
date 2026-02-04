@@ -1,6 +1,5 @@
 param(
   [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PacketDir,
-  [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$AllowedSigners,
   [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$Principal,
   [string]$Namespace = "nfl"
 )
@@ -17,7 +16,10 @@ Assert-Tool "ssh-keygen"
 Assert-Tool "cmd.exe"
 
 if (-not (Test-Path -LiteralPath $PacketDir)) { throw "Missing PacketDir: $PacketDir" }
-if (-not (Test-Path -LiteralPath $AllowedSigners)) { throw "Missing allowed_signers: $AllowedSigners" }
+
+# We REQUIRE allowed_signers to be next to the packet root (relative-path verification)
+$allowed = Join-Path $PacketDir "allowed_signers"
+if (-not (Test-Path -LiteralPath $allowed)) { throw "Missing allowed_signers: $allowed" }
 
 $commitHashPath = Join-Path $PacketDir "payload\commit_hash.txt"
 $sigPath        = Join-Path $PacketDir "signatures\ingest.sig"
@@ -28,17 +30,13 @@ if (-not (Test-Path -LiteralPath $sigPath)) { throw "Missing: $sigPath" }
 Push-Location $PacketDir
 try {
   # IMPORTANT:
-  # Use cmd.exe 'type' to feed stdin exactly as bytes from the file, avoiding PowerShell string/encoding edge cases.
-  $cmdline = @(
-    'type "payload\commit_hash.txt" ^| ssh-keygen -Y verify',
-    ('-n "{0}"' -f $Namespace),
-    ('-f "{0}"' -f $AllowedSigners),
-    ('-I "{0}"' -f $Principal),
-    ('-s "{0}"' -f "signatures\ingest.sig")
-  ) -join " "
+  # - Use cmd.exe so we can use native 'type | ssh-keygen ...' piping
+  # - Use ONLY relative paths inside the packet root (avoids cmd path parsing bugs)
+  # - Use /s so cmd preserves quoting rules
+  $cmdline = 'type "payload\commit_hash.txt" | ssh-keygen -Y verify -n "' + $Namespace + '" -f "allowed_signers" -I "' + $Principal + '" -s "signatures\ingest.sig"'
+  cmd.exe /s /c $cmdline | Out-Host
 
-  cmd.exe /c $cmdline
-  if ($LASTEXITCODE -ne 0) { throw "Signature verify FAILED (exit=$LASTEXITCODE)" }
+  if ($LASTEXITCODE -ne 0) { throw ("Signature verify FAILED (exit={0})" -f $LASTEXITCODE) }
 
   Write-Host "OK: Signature verify PASSED" -ForegroundColor Green
 } finally {
