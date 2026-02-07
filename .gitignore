@@ -21,3 +21,8 @@ proofs/test_payload.txt.sig
 scripts/_scratch/*
 !scripts/_scratch/.gitkeep
 
+# Packets (Packet Constitution v1): keep structure, ignore contents
+packets/**
+!packets/**/
+!packets/**/.gitkeep
+
