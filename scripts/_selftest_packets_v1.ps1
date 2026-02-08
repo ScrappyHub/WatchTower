@@ -1,7 +1,11 @@
 param(
   [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$RepoRoot,
 
-  # IMPORTANT: This must be the PRIVATE KEY that corresponds to the Watchtower authority pubkey in proofs/trust/trust_bundle.json.
+  # Positive = sign with repo authority key and expect verify PASS
+  # Negative = sign with wrong key and expect verify FAIL (receipt ok:false)
+  [Parameter()][ValidateSet("Positive","Negative")][string]$Mode = "Positive",
+
+  # Default = repo authority key (must match trust_bundle.json for Identity)
   [Parameter()][ValidateNotNullOrEmpty()][string]$SigningKey = (Join-Path $RepoRoot "proofs\keys\watchtower_authority_ed25519"),
 
   [Parameter()][ValidateNotNullOrEmpty()][string]$Identity   = "single-tenant/watchtower_authority/authority/watchtower",
@@ -36,6 +40,9 @@ function RelSlash([string]$abs,[string]$root){
   }
   return $r.Replace("\","/")
 }
+function TrimCrLf([string]$s){
+  return ($s -as [string]).Replace("`r","").Trim()
+}
 
 # ---- preflight ----
 if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) { Die "Missing RepoRoot: $RepoRoot" }
@@ -55,11 +62,7 @@ EnsureDir (Split-Path -Parent $ReceiptPath)
 $sshkeygen = (Get-Command ssh-keygen -ErrorAction SilentlyContinue)
 if (-not $sshkeygen) { Die "ssh-keygen not found on PATH." }
 
-if (-not (Test-Path -LiteralPath $SigningKey -PathType Leaf)) { Die "SigningKey missing: $SigningKey" }
-$SigningPub = $SigningKey + ".pub"
-if (-not (Test-Path -LiteralPath $SigningPub -PathType Leaf)) { Die "SigningKey pub missing: $SigningPub" }
-
-# ---- enforce: SigningKey.pub MUST match trust bundle pubkey for Identity ----
+# ---- load trust bundle + expected pubkey for Identity ----
 $tb = (ReadUtf8 $TrustBundlePath) | ConvertFrom-Json
 if (-not $tb) { Die "Could not parse trust_bundle.json" }
 
@@ -70,37 +73,67 @@ $match = $null
 foreach ($p in $principals) {
   if ([string]$p.principal -eq [string]$Identity) { $match = $p; break }
 }
-if (-not $match) {
-  Die ("Identity not present in trust_bundle.json principals: {0}" -f $Identity)
-}
+if (-not $match) { Die ("Identity not present in trust_bundle.json principals: {0}" -f $Identity) }
 
 $keys = @(@($match.keys))
 if ($keys.Count -lt 1) { Die ("Principal '{0}' has no keys in trust_bundle.json" -f $Identity) }
 
-# Use first key entry as canonical authority key for this identity
 $expectedPub = [string]@($keys)[0].pubkey
 if (-not $expectedPub -or $expectedPub.Trim().Length -eq 0) { Die "trust_bundle.json key missing pubkey" }
+$expectedPub = $expectedPub.Trim()
 
-$gotPub = (ReadUtf8 $SigningPub).Replace("`r","").Trim()
-if ($gotPub -ne $expectedPub.Trim()) {
-  Die ("SigningKey.pub does not match trust bundle pubkey for Identity '{0}'.`nEXPECTED: {1}`nGOT:      {2}`nFIX: Run selftest with -SigningKey pointing at the Watchtower authority private key that corresponds to the EXPECTED pubkey." -f $Identity, $expectedPub.Trim(), $gotPub)
-}
-
-# ---- choose target dirs ----
+# ---- choose working dirs ----
 $Outbox = Join-Path $RepoRoot "packets\outbox"
 EnsureDir $Outbox
 
+$Scratch = Join-Path $RepoRoot "scripts\_scratch"
+EnsureDir $Scratch
+
+# ---- decide signing key per mode ----
+$effectiveSigningKey = $SigningKey
+
+if ($Mode -eq "Negative") {
+  # Generate an ephemeral WRONG key in scripts/_scratch (ignored), so we never depend on user machine keys.
+  $stamp = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
+  $badKey = Join-Path $Scratch ("_selftest_badkey_ed25519_{0}" -f $stamp)
+
+  # ssh-keygen will create $badKey and $badKey.pub
+  & $sshkeygen.Source -t ed25519 -N "" -f $badKey -C "watchtower-selftest-badkey" | Out-Null
+  if (-not (Test-Path -LiteralPath $badKey -PathType Leaf)) { Die "Failed to create bad key: $badKey" }
+  if (-not (Test-Path -LiteralPath ($badKey + ".pub") -PathType Leaf)) { Die "Failed to create bad key pub: $($badKey + ".pub")" }
+
+  $effectiveSigningKey = $badKey
+}
+
+if (-not (Test-Path -LiteralPath $effectiveSigningKey -PathType Leaf)) { Die "SigningKey missing: $effectiveSigningKey" }
+$SigningPub = $effectiveSigningKey + ".pub"
+if (-not (Test-Path -LiteralPath $SigningPub -PathType Leaf)) { Die "SigningKey pub missing: $SigningPub" }
+
+$gotPub = (TrimCrLf (ReadUtf8 $SigningPub))
+
+if ($Mode -eq "Positive") {
+  # Positive must match trust bundle pubkey for Identity
+  if ($gotPub -ne $expectedPub) {
+    Die ("SigningKey.pub does not match trust bundle pubkey for Identity '{0}'.`nEXPECTED: {1}`nGOT:      {2}`nFIX: Provide -SigningKey pointing at the Watchtower authority private key for EXPECTED pubkey." -f $Identity, $expectedPub, $gotPub)
+  }
+} else {
+  # Negative must NOT match, otherwise the test is meaningless
+  if ($gotPub -eq $expectedPub) {
+    Die ("Negative mode refused: provided/created SigningKey.pub MATCHES the trust bundle key for Identity '{0}'. Need a WRONG key." -f $Identity)
+  }
+}
+
 # ---- create minimal packet payload ----
-$stamp = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
-$packetAbs = Join-Path $Outbox ("_selftest_packet_v1_{0}.txt" -f $stamp)
-$packetText = "watchtower packets selftest v1`nutc={0}`n" -f (Get-Date).ToUniversalTime().ToString("o")
+$stamp2 = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
+$packetAbs = Join-Path $Outbox ("_selftest_packet_v1_{0}_{1}.txt" -f $Mode.ToLowerInvariant(), $stamp2)
+$packetText = "watchtower packets selftest v1`nmode={0}`nutc={1}`n" -f $Mode, (Get-Date).ToUniversalTime().ToString("o")
 WriteUtf8NoBomLf $packetAbs ($packetText)
 
 $packetSha = Sha256Hex $packetAbs
 $packetRel = RelSlash $packetAbs $RepoRoot
 
 # ---- create minimal envelope JSON ----
-$envAbs = Join-Path $Outbox ("_selftest_envelope_v1_{0}.json" -f $stamp)
+$envAbs = Join-Path $Outbox ("_selftest_envelope_v1_{0}_{1}.json" -f $Mode.ToLowerInvariant(), $stamp2)
 
 $envObj = [ordered]@{
   schema        = "packet.envelope.v1"
@@ -118,9 +151,8 @@ WriteUtf8NoBomLf $envAbs ($envJson + "`n")
 $sigAbs = $envAbs + ".sig"
 if (Test-Path -LiteralPath $sigAbs) { Remove-Item -LiteralPath $sigAbs -Force }
 
-Write-Host ("Signing file {0}" -f $envAbs) -ForegroundColor Cyan
-& $sshkeygen.Source -Y sign -f $SigningKey -n $Namespace -I $Identity $envAbs | Out-Null
-
+Write-Host ("[{0}] Signing file {1}" -f $Mode, $envAbs) -ForegroundColor Cyan
+& $sshkeygen.Source -Y sign -f $effectiveSigningKey -n $Namespace -I $Identity $envAbs | Out-Null
 if (-not (Test-Path -LiteralPath $sigAbs -PathType Leaf)) { Die "Signature not produced: $sigAbs" }
 
 # ---- receipt count BEFORE ----
@@ -130,7 +162,22 @@ if (Test-Path -LiteralPath $ReceiptPath -PathType Leaf) {
 }
 
 # ---- verify using Watchtower verifier (IN-PROCESS) ----
-& $VerifyScript -RepoRoot $RepoRoot -EnvelopePath $envAbs -SigPath $sigAbs
+$verifyThrew = $false
+$verifyErr   = ""
+
+try {
+  & $VerifyScript -RepoRoot $RepoRoot -EnvelopePath $envAbs -SigPath $sigAbs
+} catch {
+  $verifyThrew = $true
+  $verifyErr = $_.Exception.Message
+}
+
+if ($Mode -eq "Positive") {
+  if ($verifyThrew) { Die ("Positive mode expected PASS but verify threw: {0}" -f $verifyErr) }
+} else {
+  if (-not $verifyThrew) { Die "Negative mode expected verify FAIL, but it PASSED." }
+  Write-Host ("[Negative] OK: verify failed as expected: {0}" -f $verifyErr) -ForegroundColor Yellow
+}
 
 # ---- assert receipt appended + matches this envelope ----
 $after = 0
@@ -156,9 +203,16 @@ if ([string]$last.envelope_sha256 -ne $wantEnvSha) {
   Die ("Receipt does not match envelope sha256. want={0} got={1}" -f $wantEnvSha, [string]$last.envelope_sha256)
 }
 
-Write-Host "OK: selftest PASS (packet+envelope signed with TRUSTED key, verified, receipt appended + matched)." -ForegroundColor Green
+if ($Mode -eq "Positive") {
+  if (-not [bool]$last.ok) { Die "Positive mode expected receipt ok:true but got ok:false." }
+  Write-Host "OK: selftest PASS (Positive): trusted key signed, verify PASS, receipt ok:true and matched." -ForegroundColor Green
+} else {
+  if ([bool]$last.ok) { Die "Negative mode expected receipt ok:false but got ok:true." }
+  Write-Host "OK: selftest PASS (Negative): wrong key signed, verify FAIL, receipt ok:false and matched." -ForegroundColor Green
+}
+
+Write-Host ("mode:     {0}" -f $Mode) -ForegroundColor Cyan
 Write-Host ("packet:   {0}" -f $packetRel) -ForegroundColor Cyan
 Write-Host ("envelope: {0}" -f (RelSlash $envAbs $RepoRoot)) -ForegroundColor Cyan
 Write-Host ("sig:      {0}" -f (RelSlash $sigAbs $RepoRoot)) -ForegroundColor Cyan
-Write-Host ("receipts:  {0}" -f (RelSlash $ReceiptPath $RepoRoot)) -ForegroundColor Cyan
-
+Write-Host ("receipts: {0}" -f (RelSlash $ReceiptPath $RepoRoot)) -ForegroundColor Cyan
