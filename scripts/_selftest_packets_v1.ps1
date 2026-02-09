@@ -83,7 +83,7 @@ if (-not $expectedPub -or $expectedPub.Trim().Length -eq 0) { Die "trust_bundle.
 $expectedPub = $expectedPub.Trim()
 
 # ---- choose working dirs ----
-$Outbox = Join-Path $RepoRoot "packets\outbox"
+$Outbox  = Join-Path $RepoRoot "packets\outbox"
 EnsureDir $Outbox
 
 $Scratch = Join-Path $RepoRoot "scripts\_scratch"
@@ -93,12 +93,18 @@ EnsureDir $Scratch
 $effectiveSigningKey = $SigningKey
 
 if ($Mode -eq "Negative") {
-  # Generate an ephemeral WRONG key in scripts/_scratch (ignored), so we never depend on user machine keys.
+  # Generate an ephemeral WRONG key in scripts/_scratch (ignored).
+  # IMPORTANT: use minimal ssh-keygen args (some builds reject extras).
   $stamp = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
   $badKey = Join-Path $Scratch ("_selftest_badkey_ed25519_{0}" -f $stamp)
-
-  # ssh-keygen will create $badKey and $badKey.pub
-  & $sshkeygen.Source -t ed25519 -N "" -f $badKey -C "watchtower-selftest-badkey" | Out-Null
+  # PS5.1 native-arg edge case: empty argv elements (-N '') can be dropped for native exes -> 'Too many arguments'.
+  # Use Start-Process with ONE argument string so ssh-keygen receives -N "" deterministically.
+  $arg = ('-q -t ed25519 -f "{0}" -N "" -C "{1}"' -f $badKey, "watchtower-selftest-badkey")
+  $p = Start-Process -FilePath $sshkeygen.Source -ArgumentList $arg -NoNewWindow -Wait -PassThru
+  if ($p.ExitCode -ne 0) { Die ('ssh-keygen keygen failed (exit={0})' -f $p.ExitCode) }
+  # Sanity: key MUST be unencrypted. If encrypted, -y will prompt/fail; treat as failure.
+  $pubOut = & $sshkeygen.Source -y -f $badKey 2>$null
+  if (-not $pubOut) { Die ('Bad key appears encrypted or unreadable (expected unencrypted). badKey={0}' -f $badKey) }
   if (-not (Test-Path -LiteralPath $badKey -PathType Leaf)) { Die "Failed to create bad key: $badKey" }
   if (-not (Test-Path -LiteralPath ($badKey + ".pub") -PathType Leaf)) { Die "Failed to create bad key pub: $($badKey + ".pub")" }
 
@@ -112,12 +118,10 @@ if (-not (Test-Path -LiteralPath $SigningPub -PathType Leaf)) { Die "SigningKey 
 $gotPub = (TrimCrLf (ReadUtf8 $SigningPub))
 
 if ($Mode -eq "Positive") {
-  # Positive must match trust bundle pubkey for Identity
   if ($gotPub -ne $expectedPub) {
     Die ("SigningKey.pub does not match trust bundle pubkey for Identity '{0}'.`nEXPECTED: {1}`nGOT:      {2}`nFIX: Provide -SigningKey pointing at the Watchtower authority private key for EXPECTED pubkey." -f $Identity, $expectedPub, $gotPub)
   }
 } else {
-  # Negative must NOT match, otherwise the test is meaningless
   if ($gotPub -eq $expectedPub) {
     Die ("Negative mode refused: provided/created SigningKey.pub MATCHES the trust bundle key for Identity '{0}'. Need a WRONG key." -f $Identity)
   }
