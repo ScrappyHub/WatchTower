@@ -30,3 +30,6 @@ packets/**
 # local safety quarantine
 _quarantine/
 
+
+*.bak
+scripts/_scratch/
