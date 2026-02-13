@@ -1,28 +1,21 @@
 param([Parameter(Mandatory=$true)][string]$RepoRoot)
-
-Set-StrictMode -Version Latest
 $ErrorActionPreference="Stop"
-
-$vec = Join-Path $RepoRoot "test_vectors\pcv1\minimal_packet"
-New-Item -ItemType Directory -Force -Path $vec | Out-Null
-
-$manifest = Join-Path $vec "manifest.json"
-$idPath   = Join-Path $vec "packet_id.txt"
-$sums     = Join-Path $vec "sha256sums.txt"
-
-[IO.File]::WriteAllText($manifest,'{"schema":"minimal"}',[Text.UTF8Encoding]::new($false))
-
-$sha = [Security.Cryptography.SHA256]::Create()
-$id  = ($sha.ComputeHash([IO.File]::ReadAllBytes($manifest)) | % { $_.ToString("x2") }) -join ""
-
-[IO.File]::WriteAllText($idPath,$id,[Text.UTF8Encoding]::new($false))
-
-$sum = "$id  manifest.json`n"
-[IO.File]::WriteAllText($sums,$sum,[Text.UTF8Encoding]::new($false))
-
+Set-StrictMode -Version Latest
+function Die([string]$m){ throw ("WT_PCV1_SELFTEST_FAIL: " + $m) }
+$RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 $verify = Join-Path $RepoRoot "scripts\watchtower_verify_packet_v1.ps1"
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $verify -PacketRoot $vec
+if(-not (Test-Path -LiteralPath $verify -PathType Leaf)) { Die "missing verify script" }
+$vecRoot = Join-Path $RepoRoot "test_vectors\pcv1"
+$pos = Join-Path $vecRoot "signed_packet"
+$neg = Join-Path $vecRoot "tampered_manifest"
+$psExe = (Get-Command powershell.exe -ErrorAction Stop).Source
 
-if($LASTEXITCODE -ne 0){ throw "selftest failed" }
+Write-Host "PCV1_SELFTEST: positive vector..." -ForegroundColor Cyan
+& $psExe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $verify -PacketRoot $pos
+if ($LASTEXITCODE -ne 0) { Die ("positive vector failed (exit=" + $LASTEXITCODE + ")") }
 
-Write-Host "SELFTEST_OK"
+Write-Host "PCV1_SELFTEST: negative vector (must fail)..." -ForegroundColor Cyan
+$ok = $true
+try { & $psExe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $verify -PacketRoot $neg; if ($LASTEXITCODE -eq 0) { $ok = $false } } catch { }
+if (-not $ok) { Die "negative vector unexpectedly passed" }
+Write-Host "SELFTEST_OK" -ForegroundColor Green
