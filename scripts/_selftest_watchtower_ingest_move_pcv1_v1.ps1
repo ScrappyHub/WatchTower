@@ -62,6 +62,15 @@ $movedOk = @(@(Get-ChildItem -LiteralPath $Proc -Directory -ErrorAction Silently
 if ($movedOk.Count -lt 1) {
   $movedFail = @(@(Get-ChildItem -LiteralPath $Quar -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like ("pcv1_FAIL_" + $PacketId + "_*") }))
   if ($movedFail.Count -ge 1) { Die ("vector packet quarantined (verify failed); PacketId=" + $PacketId) }
+  # --- v2: accept receipts terminal destination (exact dir name) ---
+  $receipts = Join-Path $RepoRoot "packets\receipts"
+  $movedName = (Split-Path -Leaf $dst)
+  $movedReceipts = Join-Path $receipts $movedName
+  if (Test-Path -LiteralPath $movedReceipts -PathType Container) {
+    Write-Host ("FOUND_IN_RECEIPTS: " + $movedReceipts) -ForegroundColor Green
+    return
+  }
+  # --- end receipts acceptance ---
   Die ("packet not found in processed or quarantine by PacketId prefix; PacketId=" + $PacketId)
 }
 
