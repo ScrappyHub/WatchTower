@@ -15,7 +15,13 @@ Write-Host "PCV1_SELFTEST: positive vector..." -ForegroundColor Cyan
 if ($LASTEXITCODE -ne 0) { Die ("positive vector failed (exit=" + $LASTEXITCODE + ")") }
 
 Write-Host "PCV1_SELFTEST: negative vector (must fail)..." -ForegroundColor Cyan
-$ok = $true
-try { & $psExe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $verify -PacketRoot $neg; if ($LASTEXITCODE -eq 0) { $ok = $false } } catch { }
-if (-not $ok) { Die "negative vector unexpectedly passed" }
+$failedAsExpected = $false
+$old = $ErrorActionPreference
+try {
+  $ErrorActionPreference="Continue"
+  & $psExe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $verify -PacketRoot $neg 1> $null 2> $null
+  if ($LASTEXITCODE -ne 0) { $failedAsExpected = $true }
+} catch { $failedAsExpected = $true } finally { $ErrorActionPreference=$old }
+if (-not $failedAsExpected) { Die "negative vector unexpectedly passed" }
+Write-Host "PCV1_SELFTEST: EXPECTED_FAIL (negative vector)" -ForegroundColor DarkYellow
 Write-Host "SELFTEST_OK" -ForegroundColor Green
