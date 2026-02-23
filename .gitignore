@@ -1,5 +1,9 @@
 # ---- WATCHTOWER local-only ----
 
+# NEVER COMMIT KEYS (public OR private)
+proofs/keys/**
+!proofs/keys/.gitkeep
+
 # Private keys must never be committed
 proofs/keys/*
 !proofs/keys/.gitkeep
