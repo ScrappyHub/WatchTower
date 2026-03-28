@@ -50,8 +50,8 @@ Watchtower never records secrets. Redaction is not a feature; instead, collectio
 
 ## Attestations
 Watchtower accepts:
-- Platform attestation (device â†’ Watchtower): signed ObservationSet; optional TPM quote bundle.
-- TRIAD attestation (TRIAD â†’ Watchtower): run receipt with ArtifactId + roots + transcript_root + hashes.
+- Platform attestation (device → Watchtower): signed ObservationSet; optional TPM quote bundle.
+- TRIAD attestation (TRIAD → Watchtower): run receipt with ArtifactId + roots + transcript_root + hashes.
 - Wrapper receipts (Atlas/Legacy Doctor/Security instruments): signed run summaries with artifact hash references.
 
 Watchtower verifies signatures + required fields; it does not re-prove TRIAD semantics.
@@ -72,9 +72,9 @@ Watchtower emits Receipt Artifact v1 (manifest + sha256sums + optional transcrip
 
 ## Posture / Zones
 Posture is a computed label recorded in events:
-unknown â†’ observed â†’ enrolled â†’ verified â†’ high_assurance
-Failures â†’ quarantined
-Decommission â†’ retired
+unknown → observed → enrolled → verified → high_assurance
+Failures → quarantined
+Decommission → retired
 
 Upgrade/downgrade triggers are policy-driven.
 Watchtower records results; it does not invent policy.

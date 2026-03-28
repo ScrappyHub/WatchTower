@@ -1,0 +1,13 @@
+{
+  "schema": "watchtower.heartbeat.v1",
+  "type": "object",
+  "required": ["schema","device_id","observed_utc","heartbeat_ok"],
+  "properties": {
+    "schema": { "const": "watchtower.heartbeat.v1" },
+    "device_id": { "type": "string", "minLength": 1 },
+    "observed_utc": { "type": "string", "minLength": 20 },
+    "heartbeat_ok": { "type": "boolean" },
+    "agent_version": { "type": "string" },
+    "host_name": { "type": "string" }
+  }
+}

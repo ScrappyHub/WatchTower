@@ -1,0 +1,1 @@
+{"schema":"watchtower.state.v1","device_id":"device-fail","observed_utc":"2026-01-01T00:05:00Z","evaluated_utc":"2026-03-28T18:05:38Z","state":"broken","reason":"health report indicates failure","source":"C:\\dev\\watchtower\\test_vectors\\watchtower\\state\\v1\\failure.ndjson"}

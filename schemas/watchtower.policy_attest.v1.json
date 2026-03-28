@@ -1,0 +1,14 @@
+{
+  "schema": "watchtower.policy_attest.v1",
+  "type": "object",
+  "required": ["schema","device_id","observed_utc","policy_hash","policy_ok"],
+  "properties": {
+    "schema": { "const": "watchtower.policy_attest.v1" },
+    "device_id": { "type": "string", "minLength": 1 },
+    "observed_utc": { "type": "string", "minLength": 20 },
+    "policy_hash": { "type": "string", "minLength": 1 },
+    "policy_ok": { "type": "boolean" },
+    "expected_policy_hash": { "type": "string" },
+    "drift_reason": { "type": "string" }
+  }
+}

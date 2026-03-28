@@ -1,0 +1,5 @@
+WATCHTOWER_NFL_HANDOFF_FREEZE_OK
+LATEST_BUNDLE=C:\dev\watchtower\proofs\receipts\20260308T033524Z
+FROZEN_BUNDLE=C:\dev\watchtower\test_vectors\handoff_frozen\watchtower_nfl_handoff_green_20260308
+LOCK_NOTE=C:\dev\watchtower\docs\WATCHTOWER_NFL_HANDOFF_LOCK.md
+STATUS_NOTE=C:\dev\watchtower\docs\WATCHTOWER_CANONICAL_STATUS.md

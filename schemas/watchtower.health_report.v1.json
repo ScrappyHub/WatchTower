@@ -1,0 +1,14 @@
+{
+  "schema": "watchtower.health_report.v1",
+  "type": "object",
+  "required": ["schema","device_id","observed_utc","health_ok"],
+  "properties": {
+    "schema": { "const": "watchtower.health_report.v1" },
+    "device_id": { "type": "string", "minLength": 1 },
+    "observed_utc": { "type": "string", "minLength": 20 },
+    "health_ok": { "type": "boolean" },
+    "degraded": { "type": "boolean" },
+    "failure_count": { "type": "integer", "minimum": 0 },
+    "details": { "type": "string" }
+  }
+}

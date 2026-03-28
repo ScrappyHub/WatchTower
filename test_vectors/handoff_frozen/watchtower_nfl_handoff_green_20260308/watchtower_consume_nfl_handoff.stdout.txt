@@ -1,0 +1,3 @@
+HANDOFF_SHA256SUMS_OK entries=16
+WATCHTOWER_CONSUME_NFL_OK
+RECEIPT_APPEND_OK: C:\dev\watchtower\proofs\receipts\watchtower.consume.nfl_handoff.v1.ndjson

@@ -1,0 +1,2 @@
+{"schema":"watchtower.heartbeat.v1","device_id":"device-stale","observed_utc":"2026-01-01T00:00:00Z","heartbeat_ok":true,"agent_version":"1.0.0","host_name":"node-stale"}
+{"schema":"watchtower.health_report.v1","device_id":"device-stale","observed_utc":"2026-01-01T00:30:00Z","health_ok":true,"degraded":false,"failure_count":0,"details":"later activity proves heartbeat stale"}

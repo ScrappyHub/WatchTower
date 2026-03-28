@@ -1,0 +1,14 @@
+{
+  "schema": "watchtower.alert.v1",
+  "type": "object",
+  "required": ["schema","device_id","observed_utc","alert_type","severity","state"],
+  "properties": {
+    "schema": { "const": "watchtower.alert.v1" },
+    "device_id": { "type": "string", "minLength": 1 },
+    "observed_utc": { "type": "string", "minLength": 20 },
+    "alert_type": { "type": "string", "minLength": 1 },
+    "severity": { "type": "string", "enum": ["info","warning","critical"] },
+    "state": { "type": "string", "enum": ["unknown","stale","broken","drift","degraded","ok"] },
+    "reason": { "type": "string" }
+  }
+}

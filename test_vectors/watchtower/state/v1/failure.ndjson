@@ -1,0 +1,2 @@
+{"schema":"watchtower.heartbeat.v1","device_id":"device-fail","observed_utc":"2026-01-01T00:05:00Z","heartbeat_ok":true,"agent_version":"1.0.0","host_name":"node-fail"}
+{"schema":"watchtower.health_report.v1","device_id":"device-fail","observed_utc":"2026-01-01T00:05:00Z","health_ok":false,"degraded":false,"failure_count":2,"details":"disk and service failure"}
