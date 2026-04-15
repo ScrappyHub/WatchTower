@@ -1,0 +1,2 @@
+{"schema":"watchtower.test.telemetry.v1","device_id":"936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4","observed_utc":"2026-01-01T00:01:00Z"}
+{"schema":"watchtower.test.telemetry.v1","device_id":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","observed_utc":"2026-01-01T00:02:00Z"}

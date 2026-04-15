@@ -1,0 +1,148 @@
+PHASE:WATCHTOWER_PACKET_PIPELINE
+PIPELINE_PHASE:PAYLOAD_REPLACE_START
+PIPELINE_PHASE:PAYLOAD_REPLACE_DONE
+PIPELINE_PHASE:SHA256_REBUILD_START
+PIPELINE_PHASE:SHA256_REBUILD_DONE
+PIPELINE_PHASE:RESIGN_START
+SIGN_PHASE:SIGN_START
+SIGN_PHASE:SIGN_DONE
+SIGN_PHASE:VERIFY_START
+Good "watchtower/telemetry" signature for watchtower with ED25519 key SHA256:S003m5mGsPAql5IkBG+JvDWH0V97/MyYnnZkmIwTruk
+SIGN_PHASE:VERIFY_DONE
+WATCHTOWER_SIGN_TELEMETRY_PACKET_OK
+PACKET: C:\dev\watchtower\test_vectors\watchtower\packet_v1\positive
+SIGNATURE: C:\dev\watchtower\test_vectors\watchtower\packet_v1\positive\manifest.json.sig
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_sign_telemetry_packet.ndjson
+PIPELINE_PHASE:RESIGN_DONE
+PIPELINE_PHASE:VERIFY_START
+PACKET_VERIFY_PHASE:PC_START
+PACKET_VERIFY_PHASE:PC_DONE
+PACKET_VERIFY_PHASE:SIG_START
+Good "watchtower/telemetry" signature for watchtower with ED25519 key SHA256:S003m5mGsPAql5IkBG+JvDWH0V97/MyYnnZkmIwTruk
+PACKET_VERIFY_PHASE:SIG_DONE
+PACKET_VERIFY_PHASE:PAYLOAD_VERIFY_START
+VERIFY_PHASE:READ_START
+VERIFY_PHASE:READ_DONE
+WATCHTOWER_TELEMETRY_VERIFY_OK
+TELEMETRY: C:\dev\watchtower\test_vectors\watchtower\packet_v1\positive\payload\telemetry.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_telemetry_packet_verify.ndjson
+MODE: direct_ndjson
+PACKET_VERIFY_PHASE:PAYLOAD_VERIFY_DONE
+WATCHTOWER_PACKET_VERIFY_OK
+PACKET: C:\dev\watchtower\test_vectors\watchtower\packet_v1\positive
+PAYLOAD: C:\dev\watchtower\test_vectors\watchtower\packet_v1\positive\payload\telemetry.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_telemetry_packet_verify.ndjson
+PIPELINE_PHASE:VERIFY_DONE
+WATCHTOWER_PACKET_REPAIR_AND_VERIFY_OK
+PHASE:WATCHTOWER_PACKET_SELFTEST
+PACKET_SELFTEST_PHASE:POSITIVE_REPAIR
+PACKET_SELFTEST_PHASE:NEGATIVE_BUILD
+CASE_OK: positive
+CASE_OK: negative_bad_packet_id
+CASE_OK: negative_bad_sha
+CASE_OK: negative_bad_sig
+WATCHTOWER_PACKET_VERIFY_SELFTEST_OK
+PHASE:WATCHTOWER_STATE_SELFTEST
+VERIFY_PHASE:READ_START
+VERIFY_PHASE:READ_DONE
+WATCHTOWER_TELEMETRY_VERIFY_OK
+TELEMETRY: C:\dev\watchtower\test_vectors\watchtower\state\v1\ok.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_telemetry_verify.ndjson
+MODE: direct_ndjson
+WATCHTOWER_STATE_OK
+STATE=ok
+OUT=C:\dev\watchtower\proofs\state\watchtower_state.json
+WATCHTOWER_ALERT_DERIVE_OK
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+ALERT_COUNT: 0
+WATCHTOWER_STATE_RUNNER_OK
+STATE: C:\dev\watchtower\proofs\state\watchtower_state.json
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+CASE_OK: ok => ok
+VERIFY_PHASE:READ_START
+VERIFY_PHASE:READ_DONE
+WATCHTOWER_TELEMETRY_VERIFY_OK
+TELEMETRY: C:\dev\watchtower\test_vectors\watchtower\state\v1\stale.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_telemetry_verify.ndjson
+MODE: direct_ndjson
+WATCHTOWER_STATE_OK
+STATE=stale
+OUT=C:\dev\watchtower\proofs\state\watchtower_state.json
+WATCHTOWER_ALERT_DERIVE_OK
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+ALERT_COUNT: 1
+WATCHTOWER_STATE_RUNNER_OK
+STATE: C:\dev\watchtower\proofs\state\watchtower_state.json
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+CASE_OK: stale => stale
+VERIFY_PHASE:READ_START
+VERIFY_PHASE:READ_DONE
+WATCHTOWER_TELEMETRY_VERIFY_OK
+TELEMETRY: C:\dev\watchtower\test_vectors\watchtower\state\v1\drift.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_telemetry_verify.ndjson
+MODE: direct_ndjson
+WATCHTOWER_STATE_OK
+STATE=drift
+OUT=C:\dev\watchtower\proofs\state\watchtower_state.json
+WATCHTOWER_ALERT_DERIVE_OK
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+ALERT_COUNT: 1
+WATCHTOWER_STATE_RUNNER_OK
+STATE: C:\dev\watchtower\proofs\state\watchtower_state.json
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+CASE_OK: drift => drift
+VERIFY_PHASE:READ_START
+VERIFY_PHASE:READ_DONE
+WATCHTOWER_TELEMETRY_VERIFY_OK
+TELEMETRY: C:\dev\watchtower\test_vectors\watchtower\state\v1\failure.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_telemetry_verify.ndjson
+MODE: direct_ndjson
+WATCHTOWER_STATE_OK
+STATE=broken
+OUT=C:\dev\watchtower\proofs\state\watchtower_state.json
+WATCHTOWER_ALERT_DERIVE_OK
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+ALERT_COUNT: 1
+WATCHTOWER_STATE_RUNNER_OK
+STATE: C:\dev\watchtower\proofs\state\watchtower_state.json
+ALERTS: C:\dev\watchtower\proofs\state\watchtower_alerts.ndjson
+CASE_OK: failure => broken
+WATCHTOWER_STATE_SELFTEST_OK
+PHASE:WATCHTOWER_DEVICE_CHAIN_SELFTEST
+DEVICE_CHAIN_PHASE:BOOTSTRAP
+DEVICE_CHAIN_PHASE:APPEND_1
+DEVICE_CHAIN_PHASE:APPEND_2
+DEVICE_CHAIN_PHASE:VERIFY_GOOD
+WATCHTOWER_DEVICE_CHAIN_OK
+DEVICE_CHAIN_PHASE:TAMPER
+DEVICE_CHAIN_PHASE:VERIFY_TAMPER
+WATCHTOWER_DEVICE_CHAIN_TAMPER_DETECTED
+WATCHTOWER_DEVICE_CHAIN_SELFTEST_OK
+PHASE:WATCHTOWER_DEVICE_BINDING_SELFTEST
+WATCHTOWER_DEVICE_BOOTSTRAP_OK
+DEVICE_ID: 936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4
+DEVICE_ROOT: C:\dev\watchtower\proofs\scratch\watchtower_device_binding_selftest\devices\936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4
+DEVICE_JSON: C:\dev\watchtower\proofs\scratch\watchtower_device_binding_selftest\devices\936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4\device.json
+EVENTS: C:\dev\watchtower\proofs\scratch\watchtower_device_binding_selftest\devices\936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4\events.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_device_bootstrap.ndjson
+WATCHTOWER_APPEND_DEVICE_EVENT_OK
+DEVICE_ID: 936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4
+EVENT_ID: f7e2a135e84b40097a226381c7965310a6d94a75d3191206afa30ed11883096a
+PREV_EVENT_HASH: 
+EVENTS: C:\dev\watchtower\proofs\scratch\watchtower_device_binding_selftest\devices\936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4\events.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_device_event_append.ndjson
+WATCHTOWER_BIND_TELEMETRY_TO_DEVICE_EVENT_OK
+DEVICE_ID: 936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4
+TELEMETRY: C:\dev\watchtower\proofs\scratch\watchtower_device_binding_selftest\devices\936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4\telemetry.ndjson
+DEVICES_ROOT: C:\dev\watchtower\proofs\scratch\watchtower_device_binding_selftest\devices
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_bind_telemetry_to_device_event.ndjson
+CASE_OK: good_bind
+WATCHTOWER_APPEND_DEVICE_EVENT_OK
+DEVICE_ID: 936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4
+EVENT_ID: f4fdf7e1748eaf5927b669dc17a4222919c0626a3c91aba7f40663aa8fc7a715
+PREV_EVENT_HASH: 9fb8626624b1c614052678152025868a5f6446a78da669fc40a3823d759845bf
+EVENTS: C:\dev\watchtower\proofs\scratch\watchtower_device_binding_selftest\devices\936257f45d13ce95962d64d2c829b477253fded2caaa44a93cd9e92bd286d5a4\events.ndjson
+RECEIPT: C:\dev\watchtower\proofs\receipts\watchtower_device_event_append.ndjson
+CASE_OK: multi_device_rejected
+WATCHTOWER_DEVICE_BINDING_SELFTEST_OK
+WATCHTOWER_LIVE_STATE_FULL_GREEN_OK

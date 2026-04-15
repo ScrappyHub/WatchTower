@@ -1,0 +1,4 @@
+{"schema":"watchtower.heartbeat.v1","device_id":"device-ok","observed_utc":"2026-01-01T00:05:00Z","heartbeat_ok":true,"agent_version":"1.0.0","host_name":"node-ok"}
+{"schema":"watchtower.health_report.v1","device_id":"device-ok","observed_utc":"2026-01-01T00:05:00Z","health_ok":true,"degraded":false,"failure_count":0,"details":"green"}
+{"schema":"watchtower.policy_attest.v1","device_id":"device-ok","observed_utc":"2026-01-01T00:05:00Z","policy_hash":"abc123","policy_ok":true,"expected_policy_hash":"abc123"}
+{"schema":"watchtower.health_report.v1","device_id":"dev-negative","observed_utc":"2026-03-01T00:00:00Z","status":"tampered"}

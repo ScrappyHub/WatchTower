@@ -1,0 +1,10 @@
+{
+    "payload":  [
+                    {
+                        "path":  "payload/telemetry.ndjson",
+                        "type":  "watchtower.telemetry.ndjson"
+                    }
+                ],
+    "schema":  "watchtower.telemetry.packet.v1",
+    "created_utc":  "2026-03-30T00:46:13.0312519Z"
+}

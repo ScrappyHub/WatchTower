@@ -1,0 +1,11 @@
+﻿{
+    "suspicious_count":  20,
+    "run_id":  "0d1e17152011465da064b1ba95e55571",
+    "schema":  "clarity.validator_scan.v1",
+    "scanned_targets":  [
+                            "C:\\WINDOWS\\System32",
+                            "C:\\WINDOWS\\SysWOW64",
+                            "C:\\Program Files",
+                            "C:\\Program Files(x86)"
+                        ]
+}

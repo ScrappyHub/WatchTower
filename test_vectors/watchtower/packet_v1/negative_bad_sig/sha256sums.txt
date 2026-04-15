@@ -1,0 +1,3 @@
+f1949293ca0923cc603f33cca8dd18da7dac05329e92c8344307746bfafd9984  manifest.json
+06f741f134134a015ea6fce68d1b63668c113573a42cdc24b0eb0fd4dbbbe81a  packet_id.txt
+a3914e4ae5bd63c49dbedcbfc7c35e6b0d74af4f016ff877825db1bfe7f50114  payload/telemetry.ndjson

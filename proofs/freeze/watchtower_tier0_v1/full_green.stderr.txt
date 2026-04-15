@@ -1,0 +1,2 @@
+Signing file C:\dev\watchtower\test_vectors\watchtower\packet_v1\positive\manifest.json
+Write signature to C:\dev\watchtower\test_vectors\watchtower\packet_v1\positive\manifest.json.sig

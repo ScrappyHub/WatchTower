@@ -1,0 +1,32 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"watchtower.device.v1",
+  "type":"object",
+  "additionalProperties":false,
+  "required":[
+    "schema",
+    "device_id",
+    "device_pubkey",
+    "hardware_fingerprint",
+    "manufacturer",
+    "serial",
+    "os_family",
+    "first_seen_utc",
+    "provisioning_policy_hash",
+    "trust_level",
+    "status"
+  ],
+  "properties":{
+    "schema":{"const":"watchtower.device.v1"},
+    "device_id":{"type":"string","minLength":64,"maxLength":64},
+    "device_pubkey":{"type":"string","minLength":1},
+    "hardware_fingerprint":{"type":"string","minLength":1},
+    "manufacturer":{"type":"string","minLength":1},
+    "serial":{"type":"string","minLength":1},
+    "os_family":{"type":"string","minLength":1},
+    "first_seen_utc":{"type":"string","format":"date-time"},
+    "provisioning_policy_hash":{"type":"string"},
+    "trust_level":{"type":"string","minLength":1},
+    "status":{"type":"string","minLength":1}
+  }
+}

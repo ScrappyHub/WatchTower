@@ -1,0 +1,28 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"watchtower.device_event.v1",
+  "type":"object",
+  "additionalProperties":false,
+  "required":[
+    "schema",
+    "device_id",
+    "event_id",
+    "prev_event_hash",
+    "event_type",
+    "observed_utc",
+    "payload_hash",
+    "policy_hash",
+    "status"
+  ],
+  "properties":{
+    "schema":{"const":"watchtower.device_event.v1"},
+    "device_id":{"type":"string","minLength":64,"maxLength":64},
+    "event_id":{"type":"string","minLength":64,"maxLength":64},
+    "prev_event_hash":{"type":"string"},
+    "event_type":{"type":"string","minLength":1},
+    "observed_utc":{"type":"string","format":"date-time"},
+    "payload_hash":{"type":"string"},
+    "policy_hash":{"type":"string"},
+    "status":{"type":"string","minLength":1}
+  }
+}

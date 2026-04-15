@@ -1,0 +1,4 @@
+CASE_OK: device_list
+CASE_OK: receipts_list
+CASE_OK: freeze_show
+WATCHTOWER_CLI_SELFTEST_OK
