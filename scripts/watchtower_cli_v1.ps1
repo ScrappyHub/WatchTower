@@ -141,6 +141,7 @@ $FreezeReceipt = Join-Path $RepoRoot "proofs\receipts\watchtower_tier0_freeze.nd
 
 if($null -eq $Args -or @($Args).Count -eq 0){
   Write-Host "WATCHTOWER_CLI_HELP"
+  Write-Host "watchtower quick-check"
   Write-Host "watchtower device list"
   Write-Host "watchtower device show <device_id>"
   Write-Host "watchtower receipts list"
@@ -239,6 +240,15 @@ switch($cmd0){
         WT-Die ("UNKNOWN_SELFTEST_SUBCOMMAND: " + $cmd1)
       }
     }
+  }
+
+  "quick-check" {
+    Write-Host "WATCHTOWER_QUICK_CHECK_START"
+    WT-ListDevices $DevicesRoot
+    WT-ShowFreeze $FreezeRoot $FreezeReceipt
+    WT-ListReceipts $ReceiptsRoot
+    Write-Host "WATCHTOWER_QUICK_CHECK_OK"
+    return
   }
 
   default {
